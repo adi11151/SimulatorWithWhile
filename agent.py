@@ -61,14 +61,14 @@ class Agent:
     def WallOrNot(self):
         print("WALLORNOT")
         for i in range (10):
-            self.AS[i,0,0] = 3
-            self.AS[i,9,0] = 4
-            self.AS[0,i,0] = 1
-            self.AS[0,i,0] = 2
+            self.AS[i,0,0] = 0.3
+            self.AS[i,9,0] = 0.4
+            self.AS[0,i,0] = 0.1
+            self.AS[0,i,0] = 0.2
         for i in range(9):
             for j in range(9):
                 if(self.state[i+1 , j+1] == [1,0,0]).all():
-                    self.AS[i+1,j+1,0]=10;
+                    self.AS[i+1,j+1,0]=0.5;
 
     def MeEnemypos(self,me, enemy):
         print("MEANDENEMY")
@@ -122,7 +122,7 @@ class Agent:
         print('DISTANCE function')
         for i in range (10):
             for j in range(10):
-                self.AS[i,j,dim] = abs(player.posx - i) +abs(player.posy - j)
+                self.AS[i,j,dim] = (abs(player.posx - i) +abs(player.posy - j))*0.1
  #               print(self.AgentState[i,j,dim])
 
 
@@ -162,13 +162,13 @@ class Agent:
             for j in range (10):
                 self.AS[i,j,dim] = 0
         if player.get_direction()== 'L':
-            self.AS[player.posx, player.posy, dim] = 1
+            self.AS[player.posx, player.posy, dim] = 0.1
         if player.get_direction()== 'R':
-            self.AS[player.posx, player.posy, dim] = 2
+            self.AS[player.posx, player.posy, dim] = 0.2
         if player.get_direction()== 'U':
-                self.AS[player.posx, player.posy, dim] = 3
+                self.AS[player.posx, player.posy, dim] = 0.3
         if player.get_direction()== 'D':
-            self.AS[player.posx, player.posy, dim] = 4
+            self.AS[player.posx, player.posy, dim] = 0.4
             
  #       self.AS[enemy.posx, enemy.posy, 1] = 1
  #       for i in range (10):
@@ -199,7 +199,7 @@ class Agent:
                 if(me.direction == me_.direction):                    
                     self.timesOfWrongAct += 1
                     print(self.timesOfWrongAct)
-                    reward = reward -15
+                    reward = reward -1.5
         if(me.direction == me_.direction):
             reward = reward - 0.2
         if (eog == 1):
@@ -211,10 +211,10 @@ class Agent:
                 lines_of_text = [" +++ Win! took %s  tries, my location: %s,%s, enemy:%s,%s times of wrong:%s \n " % (self.numberOfTurns,me_.posx, me_.posy, enemy.posx, enemy.posy, self.timesOfWrongAct)] 
                 self.target.writelines(lines_of_text) 
                 self.myTurn = 0
-                reward = 120 - self.numberOfTurns 
+                reward = 12 - self.numberOfTurns 
             else:
                 self.loss +=1
-                reward = -100 -self.numberOfTurns - self.timesOfWrongAct -abs(self.MyPlayer.posx - self.EnemyPlayer.posx)-abs(self.MyPlayer.posy - self.EnemyPlayer.posy)
+                reward = -10 -self.numberOfTurns - self.timesOfWrongAct -abs(self.MyPlayer.posx - self.EnemyPlayer.posx)-abs(self.MyPlayer.posy - self.EnemyPlayer.posy)
                 print("*******************************end of game AI los!!!***********************")
                 print("********************************end of game AI los!!!***********************")
                 print("*********************************end of game AI los!!!***********************")

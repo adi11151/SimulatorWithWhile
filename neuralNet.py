@@ -21,10 +21,10 @@ class neuralNet:
         self.model.add(Dropout(0.1))
         self.model.add(Dense(120, init='lecun_uniform'))
         self.model.add(Activation('sigmoid'))
-        self.model.add(Dropout(0.05))
+        self.model.add(Dropout(0.01))
         self.model.add(Dense(80, init='lecun_uniform'))
         self.model.add(Activation('sigmoid'))
-        self.model.add(Dropout(0.05))
+        self.model.add(Dropout(0.01))
         
         self.model.add(Dense(4, init='lecun_uniform'))
   #      self.model.add(Activation('sigmoid')) #linear output so we can have range of real-valued outputs
