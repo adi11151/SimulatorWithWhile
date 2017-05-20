@@ -126,8 +126,7 @@ class Player:
 
 
 
-    def DidIHit(self, me, enemy,state):
-
+    def DidIHit(self, me, enemy, state):
         if ((me.get_ammo()>0)&(me.shootThisTurn == 0)):
             if (me.get_direction()== 'U'):
                 if((me.posy - enemy.posy)<4)&((me.posy - enemy.posy)>0)&(me.posx==enemy.posx):

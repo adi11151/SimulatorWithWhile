@@ -16,7 +16,7 @@ class GameStateManager:
         self.players.append(Player(0,0,1,'R'))
         self.players.append(Player(9,9,2,'L'))
         self.playerTurnId = 0
-        self.gameturns = 100
+        self.gameturns = 50
         self.state = Map()
         self.winner = -1
         self.state.placePlayer(self.players[0])
@@ -74,7 +74,6 @@ class GameStateManager:
                 self.endOfGAme = 1
 #                print('End of Game 1')
         else:
-            self.setGameWinner()
             self.endOfGAme = 1
 #            print('End of Game 2')
 
