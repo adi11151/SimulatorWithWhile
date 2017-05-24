@@ -39,7 +39,7 @@ class Agent:
         self.steps = 0
         self.epsilon = 1
         self.epsilon_min = 0.1
-        self.epsilon_decay = 0.9999
+        self.epsilon_decay = 0.99995
         self.timesOfWrongAct = 0
         self.formme = Player
         self.formenemy=Player
@@ -50,25 +50,27 @@ class Agent:
         self.wins = 0
         self.loss = 0
         self.myTurn = 0
+        self.gamma = 0.9
       
-        
+    def save(self, path):
+        self.model.saveModel(path)   
         
     def loadModelToTrain(self, path):
-        print("fileName: model.h5")
+        print("fileName: model2.h5")
   #      path = input()
         self.model.loadModel('model.h5')    
 
     def WallOrNot(self):
         print("WALLORNOT")
         for i in range (10):
-            self.AS[i,0,0] = 0.3
-            self.AS[i,9,0] = 0.4
-            self.AS[0,i,0] = 0.1
-            self.AS[0,i,0] = 0.2
+            self.AS[i,0,0] = 1
+            self.AS[i,9,0] = 0.75
+            self.AS[0,i,0] = 0.25
+            self.AS[0,i,0] = 0.5
         for i in range(9):
             for j in range(9):
                 if(self.state[i+1 , j+1] == [1,0,0]).all():
-                    self.AS[i+1,j+1,0]=0.5;
+                    self.AS[i+1,j+1,0]=0.1;
 
     def MeEnemypos(self,me, enemy):
         print("MEANDENEMY")
@@ -162,13 +164,13 @@ class Agent:
             for j in range (10):
                 self.AS[i,j,dim] = 0
         if player.get_direction()== 'L':
-            self.AS[player.posx, player.posy, dim] = 0.1
+            self.AS[player.posx, player.posy, dim] = 0.25
         if player.get_direction()== 'R':
-            self.AS[player.posx, player.posy, dim] = 0.2
+            self.AS[player.posx, player.posy, dim] = 0.5
         if player.get_direction()== 'U':
-                self.AS[player.posx, player.posy, dim] = 0.3
+                self.AS[player.posx, player.posy, dim] = 0.75
         if player.get_direction()== 'D':
-            self.AS[player.posx, player.posy, dim] = 0.4
+            self.AS[player.posx, player.posy, dim] = 1
             
  #       self.AS[enemy.posx, enemy.posy, 1] = 1
  #       for i in range (10):
@@ -190,18 +192,50 @@ class Agent:
 #         self.AgentState[self.enemy.posx, self.enemy.posy, 5] = 1
 
 #
+
+    def shootingLine(self, me, enemy):
+        if (me.direction == 'U'):
+            if (enemy.posx == me.posx):
+                if(enemy.posy < me.posy):
+                    return 1
+                else : return 0
+            else : return 0 
+        if (me.direction == 'D'):
+            if (enemy.posx == me.posx):
+                if(enemy.posy > me.posy):
+                    return 1
+                else : return 0
+            else : return 0 
+        if (me.direction == 'L'):
+            if (enemy.posx < me.posx):
+                if(enemy.posy == me.posy):
+                    return 1
+                else : return 0
+            else : return 0
+        if (me.direction == 'R'):
+            if (enemy.posx > me.posx):
+                if(enemy.posy == me.posy):
+                    return 1
+                else : return 0
+            else : return 0
          
     def Reward(self,enemy, me, me_, WinNum, eog):   
         reward = -abs(self.MyPlayer.posx - self.EnemyPlayer.posx)-abs(self.MyPlayer.posy - self.EnemyPlayer.posy)
         reward *= 0.1 
+        if (self.shootingLine(me_,enemy)):
+            print("*************************************************************************************direction bonus")
+            reward += 10
+            
         if (me.posx == me_.posx):
             if (me.posy == me_.posy):
                 if(me.direction == me_.direction):                    
                     self.timesOfWrongAct += 1
                     print(self.timesOfWrongAct)
-                    reward = reward -1.5
+                    reward = reward -10
+                    
+        
         if(me.direction == me_.direction):
-            reward = reward - 0.2
+            reward = reward - 0.3
         if (eog == 1):
             if (WinNum == me.ID):
                 self.wins +=1
@@ -211,10 +245,10 @@ class Agent:
                 lines_of_text = [" +++ Win! took %s  tries, my location: %s,%s, enemy:%s,%s times of wrong:%s \n " % (self.numberOfTurns,me_.posx, me_.posy, enemy.posx, enemy.posy, self.timesOfWrongAct)] 
                 self.target.writelines(lines_of_text) 
                 self.myTurn = 0
-                reward = 12 - self.numberOfTurns 
+                reward = 120 - self.timesOfWrongAct
             else:
                 self.loss +=1
-                reward = -10 -self.numberOfTurns - self.timesOfWrongAct -abs(self.MyPlayer.posx - self.EnemyPlayer.posx)-abs(self.MyPlayer.posy - self.EnemyPlayer.posy)
+                reward = -100 -self.numberOfTurns - self.timesOfWrongAct -abs(self.MyPlayer.posx - self.EnemyPlayer.posx)-abs(self.MyPlayer.posy - self.EnemyPlayer.posy)
                 print("*******************************end of game AI los!!!***********************")
                 print("********************************end of game AI los!!!***********************")
                 print("*********************************end of game AI los!!!***********************")
@@ -250,7 +284,6 @@ class Agent:
             gsm.shoot()
         qVal = np.zeros((1,4))                 
         qVal = self.model.predict(self.AS) 
-        print("11111 first predict : " , qVal)
 #        OldState = np.zeros((10,10,4))
 #        OldState = copy.deepcopy(self.AgentState)
         OldState = copy.deepcopy(self.AS)
@@ -266,8 +299,7 @@ class Agent:
         print("my direction   :   ", me.direction)
 
         print("AgentState:", self.AS[0,1,2],"oldstate:", OldState[0,1,2])
-        gsm.makeMove(act)
-        
+        gsm.makeMove(act) 
         state, me, enemy = gsm.getState()
         self.tialAS(me, 1, state)
         self.tialAS(enemy, 2, state)
@@ -283,8 +315,9 @@ class Agent:
             
         if (gsm.gameturns<1)|(gsm.endOfGAme == 1):
             reward = self.Reward(formenemy, formme, me, gsm.winner, 1)
+            
             qVal[0,act] = reward
-            self.model.fit(self.AS, qVal)
+            self.model.fit(OldState, qVal)
             terminalState = 1
             print("this is the end of the game   ", gsm.gameturns)
         else: 
@@ -295,14 +328,16 @@ class Agent:
  #           print ("qvalues after second predict S(i+1): ", self.model.predict(self.AgentState),"j = ", )
             maxQ = np.amax(qVal_)
 #            print("max q  : ",maxQ, "reward = ", gamma)
-            futureValue = self.gamma * maxQ
 #            print("future value(gamma*maxQ): ",futureValue, "")
+            
+            futureValue = self.gamma * maxQ
+            
             newQ =np.add(reward, futureValue)
 #            print("adding reward : ", reward,"to future value: ",futureValue, " = ", newQ )
             qVal[0,act] = newQ
 #            print("qVal updated: ", qVal[0,act], " shoul be same as new q = " , newQ)
 #            print("qVal arrey updated: ", qVal[0])
-            self.model.fit(self.AS, qVal)               
+            self.model.fit(OldState, qVal)               
             print ("predict the old state: ", self.model.predict(OldState))
 #            print ("qvalues after second fit: ", self.model.predict(self.AgentState))
             print ("predict the new state: ", self.model.predict(self.AS))

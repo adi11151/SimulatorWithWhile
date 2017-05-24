@@ -22,16 +22,19 @@ class neuralNet:
         self.model.add(Dense(120, init='lecun_uniform'))
         self.model.add(Activation('sigmoid'))
         self.model.add(Dropout(0.01))
-        self.model.add(Dense(80, init='lecun_uniform'))
+        self.model.add(Dense(108, init='lecun_uniform'))
         self.model.add(Activation('sigmoid'))
         self.model.add(Dropout(0.01))
         
         self.model.add(Dense(4, init='lecun_uniform'))
   #      self.model.add(Activation('sigmoid')) #linear output so we can have range of real-valued outputs
 #        sgd = SGD(lr=0.06, momentum=0.1, nesterov=False)
+
+        sgd = SGD(lr=0.01, clipnorm=1.)
+
         rms = RMSprop(lr=0.001)
  #       ab = keras.optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-8, decay=0.)#learning rate is really high                                                                        
-        self.model.compile(loss='mse', optimizer = rms) #probably need to change later
+        self.model.compile(loss='mse', optimizer = sgd) #probably need to change later
 
         print("NNN initial!!!")
         

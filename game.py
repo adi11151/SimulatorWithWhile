@@ -61,12 +61,17 @@ def Tarin2AI():
 #           towrite = ['For %s iterations, %s \n' %(i, self.wins)] 
 #           self.winnPre.writelines(towrite)
 #           self.wins = 0 
+
         while (g.endOfGAme == 0):
             if (MyAgent.terminalState == 1):
                 print("end og game winner: ",g.winner)
-            MyAgent.makeQaction(g)
-            g.display()
-            MyAgent2.makeQaction(g)
+            while(MyAgent.myTurn)&(g.endOfGAme == 0):
+                MyAgent.makeQaction(g)
+            MyAgent.myTurn = 1
+#            g.display()
+            while(MyAgent2.myTurn)&(g.endOfGAme == 0):
+                MyAgent2.makeQaction(g)
+            MyAgent2.myTurn = 1
             g.display()
         g = GameStateManager() 
         print("========new game======= ", i)
@@ -83,15 +88,20 @@ def TrainAI():
     MyAgent = Agent(g.state)
     mode = input()
 #    if mode == "y":
-#        MyAgent.loadModelToTrain('model2.h')
+    MyAgent.loadModelToTrain('bestmodelever.h5')
     illigalAct = 0
-    for i in range(2000):
+    highestNumbersOfWins = 40
+    for i in range(15000):
         j = 0
         illigalAct = illigalAct + MyAgent.timesOfWrongAct
         if (i%50 == 0):
             towrite = ["eplsilon: %s illegal : %s wins: %s \n"%(MyAgent.epsilon, illigalAct, MyAgent.wins)]
             MyAgent.winnPre.writelines(towrite)
             illigalAct = 0
+            
+            if (MyAgent.wins >= highestNumbersOfWins):
+                MyAgent.save('bestmodelever2.h5')
+                highestNumbersOfWins = MyAgent.wins
             MyAgent.wins = 0
         MyAgent.initAgentParameters()
         while (g.endOfGAme == 0):
